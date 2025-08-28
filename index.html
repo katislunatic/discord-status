@@ -89,6 +89,12 @@
       background: #23272a;
       border-radius: 8px;
     }
+    .component {
+      padding: 10px;
+      border-bottom: 1px solid #444;
+      display: flex;
+      justify-content: space-between;
+    }
     footer {
       margin-top: 50px;
       font-size: 0.9rem;
@@ -110,7 +116,9 @@
     </div>
 
     <div id="moreInfo">
-      <h2>Recent Incidents</h2>
+      <h2>Component Status</h2>
+      <div id="components">Loading components...</div>
+      <h2 style="margin-top:20px;">Recent Incidents</h2>
       <div id="incidents">Loading incidents...</div>
     </div>
   </main>
@@ -139,6 +147,28 @@
         statusUpdated.textContent = "Last updated: " + new Date().toLocaleTimeString();
       } catch (err) {
         document.getElementById("statusBox").innerHTML = "⚠️ Unable to fetch status.";
+      }
+    }
+
+    async function fetchComponents() {
+      try {
+        let response = await fetch("https://discordstatus.com/api/v2/components.json");
+        let data = await response.json();
+        let componentsDiv = document.getElementById("components");
+
+        componentsDiv.innerHTML = "";
+        data.components.forEach(component => {
+          let color = "#43b581"; // green
+          if (component.status !== "operational") {
+            color = component.status.includes("partial") ? "#faa61a" : "#f04747";
+          }
+          let div = document.createElement("div");
+          div.className = "component";
+          div.innerHTML = `<span>${component.name}</span> <span style="color:${color};font-weight:bold;">${component.status}</span>`;
+          componentsDiv.appendChild(div);
+        });
+      } catch (err) {
+        document.getElementById("components").innerHTML = "⚠️ Unable to fetch components.";
       }
     }
 
@@ -171,6 +201,7 @@
       let moreInfo = document.getElementById("moreInfo");
       if (moreInfo.style.display === "none") {
         moreInfo.style.display = "block";
+        fetchComponents();
         fetchIncidents();
       } else {
         moreInfo.style.display = "none";
