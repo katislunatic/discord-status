@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Status Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #2c2f33;
+      color: #fff;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      color: #7289da;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      background: #23272a;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      display: inline-block;
+      min-width: 300px;
+    }
+    .green { color: #43b581; }
+    .yellow { color: #faa61a; }
+    .red { color: #f04747; }
+  </style>
+</head>
+<body>
+  <h1>Discord Status</h1>
+  <div id="statusBox" class="status">Loading...</div>
+
+  <script>
+    async function fetchStatus() {
+      try {
+        let response = await fetch("https://discordstatus.com/api/v2/status.json");
+        let data = await response.json();
+        let statusBox = document.getElementById("statusBox");
+        let status = data.status.description;
+
+        let colorClass = "green";
+        if (status.includes("Partial")) colorClass = "yellow";
+        if (status.includes("Major")) colorClass = "red";
+
+        statusBox.innerHTML = `<strong>Status:</strong> <span class="${colorClass}">${status}</span>`;
+      } catch (err) {
+        document.getElementById("statusBox").innerHTML = "⚠️ Unable to fetch status.";
+      }
+    }
+
+    fetchStatus();
+    setInterval(fetchStatus, 60000); // refresh every 60s
+  </script>
+</body>
+</html>
